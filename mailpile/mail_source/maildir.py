@@ -59,3 +59,23 @@ class MaildirMailSource(BaseMailSource):
             if not os.path.exists(subdir) or not os.path.isdir(subdir):
                 return False
         return True
+
+    def _process_new(self, mbx_key, mbx_cfg, mbox, msg_mbox_idx,
+                     msg, msg_ts, keywords, snippet):
+        file_name_with_folder = mbox._toc[msg_mbox_idx].encode()
+        info = file_name_with_folder.split(mbox.colon)[1]
+        if 'R' in info:
+            keywords.update(['%s:in' % tag._key for tag in self.session.config.get_tags(type='replied')])
+        if 'P' in info:
+            keywords.update(['%s:in' % tag._key for tag in self.session.config.get_tags(type='fwded')])
+        if 'T' in info:
+            keywords.update(['%s:in' % tag._key for tag in self.session.config.get_tags(type='trash')])
+        if 'F' in info:
+            keywords.update(['%s:in' % tag._key for tag in self.session.config.get_tags(type='tagged')])
+        if 'D' in info:
+            keywords.update(['%s:in' % tag._key for tag in self.session.config.get_tags(type='drafts')])
+        if 'S' in info:
+            return False
+
+        keywords.update(['%s:in' % tag._key for tag in self.session.config.get_tags(type='unread')])
+        return True
