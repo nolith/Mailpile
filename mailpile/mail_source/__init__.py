@@ -529,11 +529,11 @@ class BaseMailSource(threading.Thread):
         if self._rescanning:
             self.session.config.index.interrupt = reason
 
-    def _process_new(self, mbx_key, mbx_cfg, mbox,
+    def _process_new(self, mbx_key, mbx_cfg, mbox, msg_mbox_idx,
                      msg, msg_ts, keywords, snippet):
-        # Here subclasses could use mbx_key, mbx_cfg or mbox to grab the
-        # mailbox itself, in case it has metadata (like Maildir). The
-        # default just looks at the Status: headers of the mail itself.
+        # Here subclasses could use mbx_key, mbx_cfg, mbox or msg_mbox_idx
+        # to grab the mailbox itself, in case it has metadata (like Maildir).
+        # The default just looks at the Status: headers of the mail itself.
         return ProcessNew(self.session, msg, msg_ts, keywords, snippet)
 
     def _copy_new_messages(self, mbx_key, mbx_cfg, src,
@@ -650,11 +650,8 @@ class BaseMailSource(threading.Thread):
                     if tid:
                         apply_tags.append(tid)
 
-            with self._lock:
-                mbox = config.open_mailbox(session, mbx_key,
-                                           prefer_local=False)
-            def process_new(msg, msg_ts, keywords, snippet):
-                return self._process_new(mbx_key, mbx_cfg, mbox,
+            def process_new(mbox, msg_mbox_idx, msg, msg_ts, keywords, snippet):
+                return self._process_new(mbx_key, mbx_cfg, mbox, msg_mbox_idx,
                                          msg, msg_ts, keywords, snippet)
             scan_mailbox_args = {
                 'process_new': (process_new if mbx_cfg.process_new else False),

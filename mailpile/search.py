@@ -798,9 +798,12 @@ class MailIndex(object):
                 self._update_location(session, self.MSGIDS[msg_id], msg_ptr)
                 updated += 1
         else:
+            def process_new_with_mbox_data(msg, msg_ts, keywords, snippet):
+                return process_new(mbox, msg_mbox_idx, msg, msg_ts, keywords, snippet)
+
             msg_info = self._index_incoming_message(
                 session, msg_id, msg_ptr, msg_fd.tell(), msg,
-                last_date + 1, mailbox_idx, process_new, apply_tags)
+                last_date + 1, mailbox_idx, process_new_with_mbox_data, apply_tags)
             last_date = long(msg_info[self.MSG_DATE], 36)
             added += 1
 
